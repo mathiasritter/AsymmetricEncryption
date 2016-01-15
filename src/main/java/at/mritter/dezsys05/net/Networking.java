@@ -8,6 +8,7 @@ import org.apache.log4j.Logger;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,27 +47,36 @@ public abstract class Networking implements Runnable {
         }
     }
 
-    public void addObserver(Display display) {
+    public void addDisplay(Display display) {
         this.displays.add(display);
     }
 
 
     @Override
     public void run() {
+
         if (in == null || out == null)
-            throw new IllegalStateException("Connection has not been established yet.");
+            throw new IllegalStateException("Unable to listen for incoming messages: Connection has not been established yet.");
+
         while (running){
             try {
+
+                // wait for a new message (blocking)
                 int length = in.readInt();
                 byte[] message = new byte[length];
-                in.readFully(message, 0, message.length); // read the message
+                in.readFully(message, 0, message.length);
 
+                // the attached displays show the message
                 for (Display display : displays)
                     display.show(message);
 
             } catch (Exception e) {
-                LOG.error(e.getMessage());
-                System.exit(-1);
+                if (!running)
+                    System.exit(0);
+                else {
+                    e.printStackTrace();
+                    System.exit(-1);
+                }
             }
         }
     }

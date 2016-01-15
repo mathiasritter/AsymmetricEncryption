@@ -23,7 +23,24 @@ public class Main {
      *
      * @param args command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
+
+        Service service = new Service("10.0.1.17", "admin", "user", "group.service1", 48765);
+        Client client = new Client("10.0.1.17", "admin", "user", "group.service1", "127.0.0.1", 48765);
+
+        service.storePublicKey();
+        Thread.sleep(100);
+
+        client.fetchPublicKey();
+
+        client.sendEncryptSymKey();
+        Thread.sleep(100);
+
+        service.sendEncryptedMessage("Bla");
+        Thread.sleep(100);
+
+        client.disconnect();
+        service.disconnect();
 
         /*
         try {

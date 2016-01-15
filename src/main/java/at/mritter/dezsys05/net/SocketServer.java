@@ -32,17 +32,18 @@ public class SocketServer extends Networking {
 
     @Override
     public void connect() {
-        try {
-            LOG.info("Waiting for a client to connect...");
-            clientSocket = serverSocket.accept();
+        new Thread(() -> {
+            try {
+                clientSocket = serverSocket.accept();
+                super.setIn(new DataInputStream(clientSocket.getInputStream()));
+                super.setOut(new DataOutputStream(clientSocket.getOutputStream()));
+                new Thread(this).start();
+            } catch (Exception e) {
+                LOG.error(e.getMessage());
+                System.exit(-1);
+            }
+        }).start();
 
-            super.setIn(new DataInputStream(clientSocket.getInputStream()));
-            super.setOut(new DataOutputStream(clientSocket.getOutputStream()));
-            LOG.info("Accepted new connection");
-        } catch (Exception e) {
-            LOG.error(e.getMessage());
-            System.exit(-1);
-        }
     }
 
     @Override
@@ -55,8 +56,6 @@ public class SocketServer extends Networking {
             LOG.error(e.getMessage());
             System.exit(-1);
         }
-        LOG.info("Closed connection");
-
     }
 
 

@@ -34,6 +34,7 @@ public class SocketClient extends Networking {
             LOG.error(e.getMessage());
             System.exit(-1);
         }
+        new Thread(this).start();
     }
 
     @Override
@@ -45,7 +46,6 @@ public class SocketClient extends Networking {
             LOG.error(e.getMessage());
             System.exit(-1);
         }
-        LOG.info("Closed connection");
     }
 
 
