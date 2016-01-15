@@ -46,44 +46,59 @@ public class LDAPConnector {
             System.out.println("Authentication OK");
         } catch (NamingException e) {
             System.out.println(e.getExplanation());
+            System.exit(-1);
         }
 
     }
 
-    /**
-     * This method is used to check whether the current user is in the given group
-     *
-     * @param group the group that should be checked
-     */
-    public void userInGroup(String group) {
+    public String getDescription() {
+        NamingEnumeration results = this.search("dc=nodomain,dc=com", "(&(objectclass=PosixGroup)(cn=" + GROUP + "))");
+        return getAttributeValue(results, "description");
+    }
 
-        // configure search settings
-        SearchControls searchControls = new SearchControls();
-        searchControls.setSearchScope(SearchControls.SUBTREE_SCOPE);
-        searchControls.setTimeLimit(30000);
+    public void setDescription(String description) {
+        updateAttribute("cn=" + GROUP + ",dc=nodomain,dc=com", "description", description);
+    }
 
+    private String getAttributeValue(NamingEnumeration namingEnum, String attributeName) {
         try {
-
-            // retrieve given group
-            NamingEnumeration<?> namingEnum = this.context.search("cn=" + group + ",dc=nodomain,dc=com", "(objectclass=posixGroup)", searchControls);
-
             while (namingEnum.hasMore()) {
-                SearchResult result = (SearchResult) namingEnum.next();
-                Attributes attrs = result.getAttributes ();
-
-                System.out.print("Authorization for group " + group + " ");
-
-                // Check if user is in group
-                if (attrs.get("memberUID") != null && attrs.get("memberUid").contains(this.username))
-                    System.out.println("OK");
-                else
-                    System.out.println("NOT OK");
-
+                SearchResult sr = (SearchResult) namingEnum.next();
+                if (sr.getAttributes().get(attributeName) != null) {
+                    return sr.getAttributes().get(attributeName).get().toString();
+                }
             }
         } catch (NamingException e) {
-            System.out.println(e.getExplanation());
+            e.printStackTrace();
         }
+
+        return null;
     }
+
+    public void updateAttribute(String inDN, String inAttribute, String inValue) {
+
+        ModificationItem[] mods = new ModificationItem[1];
+        Attribute mod0 = new BasicAttribute(inAttribute, inValue);
+        mods[0] = new ModificationItem(DirContext.REPLACE_ATTRIBUTE, mod0);
+        try {
+            this.context.modifyAttributes(inDN, mods);
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public NamingEnumeration search(String inBase, String inFilter) {
+        // Search for objects using filter
+        try {
+            return this.context.search(inBase, inFilter, new SearchControls());
+        } catch (NamingException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
 
     /**
      * This method is used to disconnect from the ldap server

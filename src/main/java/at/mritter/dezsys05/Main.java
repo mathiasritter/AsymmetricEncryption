@@ -24,6 +24,8 @@ public class Main {
      * @param args command line arguments
      */
     public static void main(String[] args) {
+
+        /*
         try {
             LDAPConnector ldap = CommandParser.parseCommands(args);
 
@@ -43,6 +45,7 @@ public class Main {
             System.out.println("Unable to read from console");
             e.printStackTrace();
         }
+        */
 
 
     }
