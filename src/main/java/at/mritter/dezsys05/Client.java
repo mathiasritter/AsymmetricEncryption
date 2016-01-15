@@ -13,7 +13,7 @@ public class Client {
 
     public Client() {
 
-        this.connector = new LDAPConnector(LDAP_HOST, "admin", "user");
+        this.connector = new LDAPConnector(LDAP_HOST, "admin", "user", "group.service1");
         this.socketClient = new SocketClient("127.0.0.1", 43987);
 
     }

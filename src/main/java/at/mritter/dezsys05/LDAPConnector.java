@@ -1,6 +1,9 @@
 package at.mritter.dezsys05;
 
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import javax.naming.Context;
 import javax.naming.NamingEnumeration;
 import javax.naming.NamingException;
@@ -15,11 +18,14 @@ import java.util.Hashtable;
 public class LDAPConnector {
 
     private DirContext context;
-    private String username;
 
-    public LDAPConnector(String ip, String username, String password) {
-        this.username = username;
-        this.connect(ip, password);
+    private String group;
+
+    public static final Logger LOG = LogManager.getLogger(LDAPConnector.class);
+
+    public LDAPConnector(String ip, String username, String password, String group) {
+        this.group = group;
+        this.connect(ip, username, password);
     }
 
     /**
@@ -28,8 +34,7 @@ public class LDAPConnector {
      * @param ip server ip
      * @param password password of the user account
      */
-    private void connect(String ip, String password) {
-
+    private void connect(String ip, String username, String password) {
 
         Hashtable<String, Object> env = new Hashtable<>(11);
 
@@ -37,27 +42,27 @@ public class LDAPConnector {
         env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
         env.put(Context.PROVIDER_URL, "ldap://" + ip);
         env.put(Context.SECURITY_AUTHENTICATION, "simple");
-        env.put(Context.SECURITY_PRINCIPAL, "cn=" + this.username + ",dc=nodomain,dc=com");
+        env.put(Context.SECURITY_PRINCIPAL, "cn=" + username + ",dc=nodomain,dc=com");
         env.put(Context.SECURITY_CREDENTIALS, password);
 
         try {
             // establish connection
             this.context = new InitialDirContext(env);
-            System.out.println("Authentication OK");
+            LOG.info("Authentication OK");
         } catch (NamingException e) {
-            System.out.println(e.getExplanation());
+            LOG.error(e.getMessage());
             System.exit(-1);
         }
 
     }
 
     public String getDescription() {
-        NamingEnumeration results = this.search("dc=nodomain,dc=com", "(&(objectclass=PosixGroup)(cn=" + GROUP + "))");
+        NamingEnumeration results = this.search("dc=nodomain,dc=com", "(&(objectclass=PosixGroup)(cn=" + this.group + "))");
         return getAttributeValue(results, "description");
     }
 
     public void setDescription(String description) {
-        updateAttribute("cn=" + GROUP + ",dc=nodomain,dc=com", "description", description);
+        updateAttribute("cn=" + this.group + ",dc=nodomain,dc=com", "description", description);
     }
 
     private String getAttributeValue(NamingEnumeration namingEnum, String attributeName) {
@@ -69,7 +74,8 @@ public class LDAPConnector {
                 }
             }
         } catch (NamingException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
+            System.exit(-1);
         }
 
         return null;
@@ -83,19 +89,19 @@ public class LDAPConnector {
         try {
             this.context.modifyAttributes(inDN, mods);
         } catch (NamingException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
+            System.exit(-1);
         }
 
     }
 
     public NamingEnumeration search(String inBase, String inFilter) {
-        // Search for objects using filter
         try {
             return this.context.search(inBase, inFilter, new SearchControls());
         } catch (NamingException e) {
-            e.printStackTrace();
+            LOG.error(e.getMessage());
+            System.exit(-1);
         }
-
         return null;
     }
 
@@ -107,7 +113,8 @@ public class LDAPConnector {
         try {
             this.context.close();
         } catch (NamingException e) {
-            System.out.println(e.getExplanation());
+            LOG.error(e.getMessage());
+            System.exit(-1);
         }
     }
 

@@ -21,7 +21,7 @@ public class CommandParser {
         String username = line.getOptionValue('u');
         String password = line.getOptionValue('p');
 
-        return new LDAPConnector(host, username, password);
+        return new LDAPConnector(host, username, password, "group.service1");
 
     }
 
