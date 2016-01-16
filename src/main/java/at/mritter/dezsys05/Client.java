@@ -51,10 +51,6 @@ public class Client extends Encryptor {
         this.input = input;
         super.setSymKey(generateSymKey());
 
-        // connect to ldap server
-        LDAPConnector connector = new LDAPConnector(ldapHost, ldapUsername, ldapPassword, ldapGroup);
-        super.setConnector(connector);
-
         // connect to service
         Networking socket = new SocketClient(this, serviceHost, servicePort);
         super.setSocket(socket);
