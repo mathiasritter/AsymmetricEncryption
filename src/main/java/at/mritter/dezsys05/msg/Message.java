@@ -1,9 +1,9 @@
-package at.mritter.dezsys05.net;
+package at.mritter.dezsys05.msg;
 
 import java.nio.charset.StandardCharsets;
 
 /**
- * Created by Mathias on 16.01.16.
+ * This class represents a message that is used for the communication between client and service
  */
 public class Message {
 

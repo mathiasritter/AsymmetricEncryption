@@ -1,18 +1,14 @@
 package at.mritter.dezsys05.net;
 
 
-import at.mritter.dezsys05.Display;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents a network server.
@@ -47,21 +43,19 @@ public class SocketServer extends Networking {
      */
     @Override
     public void connect() {
-        new Thread(() -> {
-            try {
-                // accept new client connection, get streams to read/write
-                clientSocket = serverSocket.accept();
+        try {
+            // accept new client connection, get streams to read/write
+            clientSocket = serverSocket.accept();
 
-                super.setIn(new DataInputStream(clientSocket.getInputStream()));
-                super.setOut(new DataOutputStream(clientSocket.getOutputStream()));
+            super.setIn(new DataInputStream(clientSocket.getInputStream()));
+            super.setOut(new DataOutputStream(clientSocket.getOutputStream()));
 
-                // start listening for incoming messages
-                new Thread(this).start();
-            } catch (Exception e) {
-                LOG.error(e.getMessage());
-                System.exit(-1);
-            }
-        }).start();
+            // start listening for incoming messages
+            new Thread(this).start();
+        } catch (Exception e) {
+            LOG.error(e.getMessage());
+            System.exit(-1);
+        }
 
     }
 

@@ -11,7 +11,7 @@
     <properties>
         <java.version>1.8</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <main>at.mritter.dezsys05.Main</main>
+        <main>at.mritter.dezsys05.start.StartServiceAndClient</main>
         <jar.filename>DezSys05</jar.filename>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

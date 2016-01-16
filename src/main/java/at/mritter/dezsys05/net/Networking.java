@@ -1,7 +1,9 @@
 package at.mritter.dezsys05.net;
 
 
-import at.mritter.dezsys05.Display;
+import at.mritter.dezsys05.Recipient;
+import at.mritter.dezsys05.msg.Message;
+import at.mritter.dezsys05.msg.MessageType;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -27,13 +29,13 @@ public abstract class Networking implements Runnable {
 
     private volatile boolean running = true;
 
-    private List<Display> displays;
+    private List<Recipient> recipients;
 
     /**
-     * Initialize array list of displays in constructor
+     * Initialize array list of recipients in constructor
      */
     protected Networking() {
-        this.displays = new ArrayList<>();
+        this.recipients = new ArrayList<>();
     }
 
     /**
@@ -77,13 +79,13 @@ public abstract class Networking implements Runnable {
     }
 
     /**
-     * Add a new display.
-     * The displays are used to handleMessage the messages.
+     * Add a new recipient.
+     * The recipients are used to handleMessage the messages.
      *
-     * @param display display to handleMessage the messages
+     * @param recipient recipient to handleMessage the messages
      */
-    public void addDisplay(Display display) {
-        this.displays.add(display);
+    public void addDisplay(Recipient recipient) {
+        this.recipients.add(recipient);
     }
 
 
@@ -107,9 +109,9 @@ public abstract class Networking implements Runnable {
 
                 Message message = new Message(messageContent, messageType);
 
-                // the attached displays handleMessage the message
-                for (Display display : displays) {
-                    display.handleMessage(message);
+                // the attached recipients handleMessage the message
+                for (Recipient recipient : recipients) {
+                    recipient.handleMessage(message);
                 }
 
 
@@ -117,7 +119,7 @@ public abstract class Networking implements Runnable {
                 if (!running)
                     System.exit(0);
                 else {
-                    e.printStackTrace();
+                    LOG.error(e.getMessage());
                     System.exit(-1);
                 }
             }

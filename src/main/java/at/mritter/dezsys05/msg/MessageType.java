@@ -1,4 +1,4 @@
-package at.mritter.dezsys05.net;
+package at.mritter.dezsys05.msg;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +8,7 @@ import java.util.Map;
  */
 public enum MessageType {
 
-    ENCRYPTED_SYM_KEY('S'), ENCRYPTED_MESSAGE('E'), STORED_PUB_KEY('P'), CLIENT_READY('R'), CLOSE_CONNECTION('C');
+    ENCRYPTED_SYM_KEY('S'), ENCRYPTED_MESSAGE('E'), STORED_PUB_KEY('P'), CLIENT_CONNECTED('D'), CLOSE_CONNECTION('C'), SERVICE_READY('R');
 
 
     private final char value;

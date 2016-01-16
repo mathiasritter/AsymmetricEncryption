@@ -1,16 +1,13 @@
 package at.mritter.dezsys05.net;
 
 
-import at.mritter.dezsys05.Display;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
+import at.mritter.dezsys05.msg.Message;
+import at.mritter.dezsys05.msg.MessageType;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents a network client.
@@ -53,7 +50,7 @@ public class SocketClient extends Networking {
             new Thread(this).start();
 
             // send initial message
-            Message message = new Message("I am your client and ready to receive messages", MessageType.CLIENT_READY);
+            Message message = new Message("I am your client and ready to receive messages", MessageType.CLIENT_CONNECTED);
             super.write(message);
         } catch (Exception e) {
             LOG.error(e.getMessage());

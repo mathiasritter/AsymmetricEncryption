@@ -1,16 +1,16 @@
 package at.mritter.dezsys05;
 
 
-import at.mritter.dezsys05.net.Message;
-import at.mritter.dezsys05.net.MessageType;
+import at.mritter.dezsys05.msg.Message;
+import at.mritter.dezsys05.msg.MessageType;
 import at.mritter.dezsys05.net.Networking;
 import at.mritter.dezsys05.net.SocketClient;
+import at.mritter.dezsys05.ui.Input;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
 import javax.crypto.*;
 import javax.xml.bind.DatatypeConverter;
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
@@ -18,33 +18,34 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-public class Client implements Display {
+public class Client extends Encryptor implements Recipient {
 
     public static final Logger LOG = LogManager.getLogger(Client.class);
+    private final Input input;
 
-    private Networking socketClient;
-    private LDAPConnector connector;
-
-
-    private SecretKey symKey;
     private PublicKey publicKey;
 
-    public Client(String ldapHost, String ldapUsername, String ldapPassword, String ldapGroup, String serviceHost, int servicePort) {
+    public Client(Input input, String ldapHost, String ldapUsername, String ldapPassword, String ldapGroup, String serviceHost, int servicePort) {
 
-        this.symKey = generateSymKey();
+        this.input = input;
 
-        this.connector = new LDAPConnector(ldapHost, ldapUsername, ldapPassword, ldapGroup);
+        super.setSymKey(generateSymKey());
 
-        this.socketClient = new SocketClient(serviceHost, servicePort);
-        this.socketClient.addDisplay(this);
-        this.socketClient.connect();
+        LDAPConnector connector = new LDAPConnector(ldapHost, ldapUsername, ldapPassword, ldapGroup);
+        super.setConnector(connector);
+
+        Networking socket = new SocketClient(serviceHost, servicePort);
+        super.setSocket(socket);
+        socket.addDisplay(this);
+        socket.connect();
+
 
     }
 
     public void fetchPublicKey() {
         try {
             // the LDAP-Key from the server
-            String ldapKey = this.connector.getDescription();
+            String ldapKey = super.getConnector().getDescription();
             // convert hex to bytes and wrap it so java can create a public key
             byte[] key = hexStringToByteArray(ldapKey);
             X509EncodedKeySpec pubKeySpec = new X509EncodedKeySpec(key);
@@ -71,24 +72,11 @@ public class Client implements Display {
         try {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, this.publicKey);
-            byte[] encoded = cipher.doFinal(this.symKey.getEncoded());
+            byte[] encoded = cipher.doFinal(super.getSymKey().getEncoded());
 
             Message message = new Message(encoded, MessageType.ENCRYPTED_SYM_KEY);
 
-            this.socketClient.write(message);
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void printDecryptedMessage(byte[] message) {
-        try {
-            // the algorithm to decrypt
-            Cipher cipher = Cipher.getInstance("AES");
-            cipher.init(Cipher.DECRYPT_MODE, this.symKey);
-            // decode the data read from the server
-            byte[] decoded = cipher.doFinal(message);
-            System.out.println("Received encrypted message and decrypted it: " + new String(decoded));
+            super.getSocket().write(message);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException e) {
             e.printStackTrace();
         }
@@ -99,25 +87,28 @@ public class Client implements Display {
 
         switch (message.getType()) {
             case STORED_PUB_KEY:
+                LOG.info("Fetching public key from LDAP...");
                 this.fetchPublicKey();
+                LOG.info("Sending encrypted symmetric key to service...");
                 this.sendEncryptSymKey();
                 break;
             case ENCRYPTED_MESSAGE:
-                this.printDecryptedMessage(message.getContent());
+                LOG.info("Received an encrypted message, decrypting...");
+                super.printDecryptedMessage(message.getContent());
+                break;
+            case SERVICE_READY:
+                LOG.info("Ready for sending encrypted messages!");
+                this.input.acceptUserInput(this);
                 break;
             case CLOSE_CONNECTION:
-                this.disconnect();
+                LOG.info("Server closed connection");
+                super.disconnect();
                 break;
         }
     }
 
-    public void disconnect() {
-        this.socketClient.disconnect();
-        this.connector.disconnect();
-    }
 
     private byte[] hexStringToByteArray(String s) {
-        System.out.println("Converting byte array to hex: " + s);
         return DatatypeConverter.parseHexBinary(s);
     }
 }
