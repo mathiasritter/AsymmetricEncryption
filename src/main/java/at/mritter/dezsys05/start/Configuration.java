@@ -1,7 +1,11 @@
 package at.mritter.dezsys05.start;
 
+
 /**
- * Created by Mathias on 16.01.16.
+ * This class is used to set the configuration parameters.
+ *
+ * @author Mathias Ritter
+ * @version 1.0
  */
 public class Configuration {
 

@@ -52,7 +52,7 @@ public class SocketClient extends Networking {
             new Thread(this).start();
 
             // send initial message
-            Message message = new Message("I am your client and ready to receive messages", MessageType.CLIENT_CONNECTED);
+            Message message = new Message("I am connected and ready to receive messages", MessageType.CLIENT_CONNECTED);
             super.write(message);
         } catch (Exception e) {
             LOG.error(e.getMessage());

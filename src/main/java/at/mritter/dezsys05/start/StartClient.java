@@ -5,17 +5,24 @@ import at.mritter.dezsys05.Service;
 import at.mritter.dezsys05.ui.ConsoleInput;
 
 /**
- * This class starts service and client
+ * The main method of this class starts the client
  *
  * @author Mathias Ritter
+ * @version 1.0
  */
 public class StartClient {
 
 
-    public static void main(String[] args) throws InterruptedException {
+    /**
+     * Start client
+     *
+     * @param args command line arguments
+     */
+    public static void main(String[] args) {
 
-        Client client = new Client(new ConsoleInput(), Configuration.LDAP_HOST , Configuration.LDAP_USER, Configuration.LDAP_PASSWORD,
-                Configuration.LDAP_GROUP, Configuration.SERVICE_HOST, Configuration.SERVICE_PORT);
+        Client client = new Client(new ConsoleInput(), Configuration.LDAP_HOST , Configuration.LDAP_USER,
+                Configuration.LDAP_PASSWORD, Configuration.LDAP_GROUP, Configuration.SERVICE_HOST,
+                Configuration.SERVICE_PORT);
 
     }
 

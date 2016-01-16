@@ -1,4 +1,4 @@
-package at.mritter.dezsys05;
+package at.mritter.dezsys05.net;
 
 
 import org.apache.log4j.LogManager;
@@ -48,7 +48,7 @@ public class LDAPConnector {
         try {
             // establish connection
             this.context = new InitialDirContext(env);
-            LOG.info("Authentication OK");
+            LOG.info("Successfully established connection to LDAP server");
         } catch (NamingException e) {
             LOG.error(e.getMessage());
             System.exit(-1);
@@ -56,15 +56,32 @@ public class LDAPConnector {
 
     }
 
-    public String getDescription() {
+    /**
+     * Returns the description of the user's ldap group
+     *
+     * @return description of group
+     */
+    public String getGroupDescription() {
         NamingEnumeration results = this.search("dc=nodomain,dc=com", "(&(objectclass=PosixGroup)(cn=" + this.group + "))");
         return getAttributeValue(results, "description");
     }
 
-    public void setDescription(String description) {
+    /**
+     * Sets the description of the user's ldap group
+     *
+     * @param description description to set
+     */
+    public void setGroupDescription(String description) {
         updateAttribute("cn=" + this.group + ",dc=nodomain,dc=com", "description", description);
     }
 
+    /**
+     * Gets the value of the given ldap attribute
+     *
+     * @param namingEnum location of the attribute
+     * @param attributeName name of the attribute
+     * @return the attribute's value
+     */
     private String getAttributeValue(NamingEnumeration namingEnum, String attributeName) {
         try {
             while (namingEnum.hasMore()) {
@@ -81,6 +98,13 @@ public class LDAPConnector {
         return null;
     }
 
+    /**
+     * Updates the given attribute
+     *
+     * @param inDN dn
+     * @param inAttribute the attribute
+     * @param inValue the new value
+     */
     public void updateAttribute(String inDN, String inAttribute, String inValue) {
 
         ModificationItem[] mods = new ModificationItem[1];
@@ -95,6 +119,13 @@ public class LDAPConnector {
 
     }
 
+    /**
+     * Searches for a specific node
+     *
+     * @param inBase the base that will be searched
+     * @param inFilter the search filzer
+     * @return the naming enumeration found
+     */
     public NamingEnumeration search(String inBase, String inFilter) {
         try {
             return this.context.search(inBase, inFilter, new SearchControls());

@@ -49,6 +49,7 @@ public class SocketServer extends Networking {
             // accept new client connection, get streams to read/write
             clientSocket = serverSocket.accept();
 
+            // set io streams
             super.setIn(new DataInputStream(clientSocket.getInputStream()));
             super.setOut(new DataOutputStream(clientSocket.getOutputStream()));
 
@@ -68,6 +69,7 @@ public class SocketServer extends Networking {
     public void disconnect() {
         super.disconnect();
         try {
+            // close client and server socket
             clientSocket.close();
             serverSocket.close();
         } catch (IOException e) {

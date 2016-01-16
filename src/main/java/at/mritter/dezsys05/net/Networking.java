@@ -2,7 +2,6 @@ package at.mritter.dezsys05.net;
 
 
 import at.mritter.dezsys05.Encryptor;
-import at.mritter.dezsys05.Recipient;
 import at.mritter.dezsys05.msg.Message;
 import at.mritter.dezsys05.msg.MessageType;
 import org.apache.log4j.LogManager;
@@ -11,8 +10,6 @@ import org.apache.log4j.Logger;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * This class represents a network resource that is able to read (receive) and write (send) messages
@@ -32,6 +29,12 @@ public abstract class Networking implements Runnable {
 
     private Encryptor encryptor;
 
+    /**
+     * Sets the encryptor.
+     * The encryptor is the service or the client that is able to handle incoming messages.
+     *
+     * @param encryptor service or client
+     */
     public Networking(Encryptor encryptor) {
         this.encryptor = encryptor;
     }
@@ -51,6 +54,7 @@ public abstract class Networking implements Runnable {
      */
     public void write(Message message) {
         try {
+            // write type of message, length and content
             out.writeChar(message.getType().getValue());
             out.writeInt(message.getLength());
             out.write(message.getContent());
@@ -91,15 +95,15 @@ public abstract class Networking implements Runnable {
         while (running){
             try {
 
+                // read message type (char), message length (int) and then the content of the message
                 MessageType messageType = MessageType.valueOf(in.readChar());
                 int length = in.readInt();
                 byte[] messageContent = new byte[length];
                 in.readFully(messageContent, 0, messageContent.length);
 
+                // create new message object, call the handler of the encryptor
                 Message message = new Message(messageContent, messageType);
-
                 encryptor.handleMessage(message);
-
 
             } catch (Exception e) {
                 if (!running)

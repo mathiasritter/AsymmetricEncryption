@@ -4,11 +4,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Mathias on 16.01.16.
+ * Enum that describes the type of a message
+ *
+ * @author Mathias Ritter
+ * @version 1.0
  */
 public enum MessageType {
 
-    ENCRYPTED_SYM_KEY('S'), ENCRYPTED_MESSAGE('E'), STORED_PUB_KEY('P'), CLIENT_CONNECTED('D'), CLOSE_CONNECTION('C'), SERVICE_READY('R');
+    ENCRYPTED_SYM_KEY('S'), ENCRYPTED_MESSAGE('E'), STORED_PUB_KEY('P'),
+    CLIENT_CONNECTED('D'), CLOSE_CONNECTION('C'), SERVICE_READY('R');
 
 
     private final char value;
@@ -27,7 +31,6 @@ public enum MessageType {
     public static MessageType valueOf(char messageType) {
         return map.get(messageType);
     }
-
 
 
     public char getValue() {

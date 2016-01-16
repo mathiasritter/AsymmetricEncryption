@@ -9,40 +9,43 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 /**
- * Created by Mathias on 16.01.16.
+ * This class is used for user inputs using the console
+ *
+ * @author Mathias Ritter
+ * @version 1.0
  */
 public class ConsoleInput implements Input {
 
     public static final Logger LOG = LogManager.getLogger(ConsoleInput.class);
 
+    /**
+     * @see Input#acceptUserInput(Encryptor)
+     */
     @Override
-    public void acceptUserInput(Encryptor sender) {
+    public void acceptUserInput(Encryptor encryptor) {
 
         new Thread(() -> {
 
             LOG.info("Please enter a message or \"exit\" to exit");
 
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+
+            // read from the console till the user enters "exit"
             while (true) {
                 String line = null;
                 try {
                     line = br.readLine();
                     if (line.equals("exit")) {
-                        sender.disconnect();
+                        encryptor.disconnect();
                         break;
                     }
-                    sender.sendEncryptedMessage(line);
+                    encryptor.sendEncryptedMessage(line);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-
-
             }
 
         }).start();
-
-
-
 
 
     }
