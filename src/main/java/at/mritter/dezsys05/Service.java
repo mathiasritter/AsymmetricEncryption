@@ -1,5 +1,7 @@
 package at.mritter.dezsys05;
 
+import at.mritter.dezsys05.net.Message;
+import at.mritter.dezsys05.net.MessageType;
 import at.mritter.dezsys05.net.Networking;
 import at.mritter.dezsys05.net.SocketServer;
 import org.apache.log4j.LogManager;
@@ -9,6 +11,7 @@ import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 
 public class Service implements Display {
@@ -20,9 +23,13 @@ public class Service implements Display {
 
     private Networking socketServer;
 
+    private Input input;
+
     public static final Logger LOG = LogManager.getLogger(Service.class);
 
-    public Service(String ldapHost, String ldapUsername, String ldapPassword, String ldapGroup, int servicePort) {
+    public Service(Input input, String ldapHost, String ldapUsername, String ldapPassword, String ldapGroup, int servicePort) {
+
+        this.input = input;
 
         try {
             // Generate the KeyPair for later use
@@ -46,7 +53,7 @@ public class Service implements Display {
         return generator.generateKeyPair();
     }
 
-    public void storePublicKey() {
+    private void storePublicKey() {
         this.connector.setDescription(byteArrayToHexString(this.keyPair.getPublic().getEncoded()));
     }
 
@@ -67,24 +74,38 @@ public class Service implements Display {
     }
 
     @Override
-    public void show(byte[] message) {
-        LOG.info("Service has received a new message");
-        this.decryptSymKey(message);
+    public void handleMessage(Message message) {
+
+        switch (message.getType()) {
+            case ENCRYPTED_SYM_KEY:
+                this.decryptSymKey(message.getContent());
+                input.acceptUserInput(this);
+                break;
+            case CLIENT_READY:
+                this.storePublicKey();
+                Message response = new Message("Successfully stored public Key", MessageType.STORED_PUB_KEY);
+                this.socketServer.write(response);
+                break;
+        }
     }
 
-    public void sendEncryptedMessage(String message) {
+
+
+    public void sendEncryptedMessage(String text) {
         if (this.symKey != null) {
             try {
-                System.out.println("Sending encrypted message to server: " + message);
+                System.out.println("Sending encrypted message to server: " + text);
                 // Set the encryption algorithm
                 Cipher cipher = Cipher.getInstance("AES");
                 // use the sym key to encrypt
                 cipher.init(Cipher.ENCRYPT_MODE, this.symKey);
 
                 // encrypt the actual message
-                byte[] encrypted = cipher.doFinal((message).getBytes());
+                byte[] encrypted = cipher.doFinal((text).getBytes());
+
                 // send it to the client
-                this.socketServer.write(encrypted);
+                Message message = new Message(encrypted, MessageType.ENCRYPTED_MESSAGE);
+                this.socketServer.write(message);
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -94,6 +115,9 @@ public class Service implements Display {
     }
 
     public void disconnect() {
+        Message message = new Message("Close connection", MessageType.CLOSE_CONNECTION);
+        this.socketServer.write(message);
+
         this.socketServer.disconnect();
         this.connector.disconnect();
     }

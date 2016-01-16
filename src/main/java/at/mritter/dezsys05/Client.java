@@ -1,6 +1,8 @@
 package at.mritter.dezsys05;
 
 
+import at.mritter.dezsys05.net.Message;
+import at.mritter.dezsys05.net.MessageType;
 import at.mritter.dezsys05.net.Networking;
 import at.mritter.dezsys05.net.SocketClient;
 import org.apache.log4j.LogManager;
@@ -49,7 +51,6 @@ public class Client implements Display {
             // set the key algorithm
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
             this.publicKey = keyFactory.generatePublic(pubKeySpec);
-            LOG.debug("blaaaaaaa");
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
@@ -71,7 +72,10 @@ public class Client implements Display {
             Cipher cipher = Cipher.getInstance("RSA");
             cipher.init(Cipher.ENCRYPT_MODE, this.publicKey);
             byte[] encoded = cipher.doFinal(this.symKey.getEncoded());
-            this.socketClient.write(encoded);
+
+            Message message = new Message(encoded, MessageType.ENCRYPTED_SYM_KEY);
+
+            this.socketClient.write(message);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | BadPaddingException | InvalidKeyException | IllegalBlockSizeException e) {
             e.printStackTrace();
         }
@@ -91,9 +95,20 @@ public class Client implements Display {
     }
 
     @Override
-    public void show(byte[] message) {
-        LOG.info("Client has received a new message");
-        this.printDecryptedMessage(message);
+    public void handleMessage(Message message) {
+
+        switch (message.getType()) {
+            case STORED_PUB_KEY:
+                this.fetchPublicKey();
+                this.sendEncryptSymKey();
+                break;
+            case ENCRYPTED_MESSAGE:
+                this.printDecryptedMessage(message.getContent());
+                break;
+            case CLOSE_CONNECTION:
+                this.disconnect();
+                break;
+        }
     }
 
     public void disconnect() {

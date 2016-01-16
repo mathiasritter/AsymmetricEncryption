@@ -1,8 +1,10 @@
 package at.mritter.dezsys05;
 
 
+import at.mritter.dezsys05.net.Message;
+
 public interface Display {
 
-    void show(byte[] message);
+    void handleMessage(Message message);
 
 }
