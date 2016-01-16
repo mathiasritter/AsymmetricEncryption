@@ -1,6 +1,7 @@
 package at.mritter.dezsys05.net;
 
 
+import at.mritter.dezsys05.Encryptor;
 import at.mritter.dezsys05.msg.Message;
 import at.mritter.dezsys05.msg.MessageType;
 
@@ -30,7 +31,8 @@ public class SocketClient extends Networking {
      * @param host The host of the server
      * @param port The port of the server
      */
-    public SocketClient(String host, int port) {
+    public SocketClient(Encryptor encryptor, String host, int port) {
+        super(encryptor);
         this.host = host;
         this.port = port;
     }

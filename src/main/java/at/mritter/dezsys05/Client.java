@@ -18,7 +18,7 @@ import java.security.PublicKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
 
-public class Client extends Encryptor implements Recipient {
+public class Client extends Encryptor {
 
     public static final Logger LOG = LogManager.getLogger(Client.class);
     private final Input input;
@@ -34,9 +34,8 @@ public class Client extends Encryptor implements Recipient {
         LDAPConnector connector = new LDAPConnector(ldapHost, ldapUsername, ldapPassword, ldapGroup);
         super.setConnector(connector);
 
-        Networking socket = new SocketClient(serviceHost, servicePort);
+        Networking socket = new SocketClient(this, serviceHost, servicePort);
         super.setSocket(socket);
-        socket.addDisplay(this);
         socket.connect();
 
 

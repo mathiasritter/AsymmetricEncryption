@@ -1,6 +1,7 @@
 package at.mritter.dezsys05.net;
 
 
+import at.mritter.dezsys05.Encryptor;
 import at.mritter.dezsys05.Recipient;
 import at.mritter.dezsys05.msg.Message;
 import at.mritter.dezsys05.msg.MessageType;
@@ -29,14 +30,12 @@ public abstract class Networking implements Runnable {
 
     private volatile boolean running = true;
 
-    private List<Recipient> recipients;
+    private Encryptor encryptor;
 
-    /**
-     * Initialize array list of recipients in constructor
-     */
-    protected Networking() {
-        this.recipients = new ArrayList<>();
+    public Networking(Encryptor encryptor) {
+        this.encryptor = encryptor;
     }
+
 
     /**
      * Connects to another network resource or waits for incoming connections. <br>
@@ -78,16 +77,6 @@ public abstract class Networking implements Runnable {
         }
     }
 
-    /**
-     * Add a new recipient.
-     * The recipients are used to handleMessage the messages.
-     *
-     * @param recipient recipient to handleMessage the messages
-     */
-    public void addDisplay(Recipient recipient) {
-        this.recipients.add(recipient);
-    }
-
 
     /**
      * Receives new messages while thread is running
@@ -109,10 +98,7 @@ public abstract class Networking implements Runnable {
 
                 Message message = new Message(messageContent, messageType);
 
-                // the attached recipients handleMessage the message
-                for (Recipient recipient : recipients) {
-                    recipient.handleMessage(message);
-                }
+                encryptor.handleMessage(message);
 
 
             } catch (Exception e) {

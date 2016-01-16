@@ -13,7 +13,7 @@ import javax.crypto.spec.SecretKeySpec;
 import javax.xml.bind.DatatypeConverter;
 import java.security.*;
 
-public class Service extends Encryptor implements Recipient {
+public class Service extends Encryptor {
 
     private KeyPair keyPair;
 
@@ -35,9 +35,8 @@ public class Service extends Encryptor implements Recipient {
         LDAPConnector connector = new LDAPConnector(ldapHost, ldapUsername, ldapPassword, ldapGroup);
         super.setConnector(connector);
 
-        Networking socket = new SocketServer(servicePort);
+        Networking socket = new SocketServer(this, servicePort);
         super.setSocket(socket);
-        socket.addDisplay(this);
         socket.connect();
 
     }

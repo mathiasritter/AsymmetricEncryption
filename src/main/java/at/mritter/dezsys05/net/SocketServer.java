@@ -1,6 +1,7 @@
 package at.mritter.dezsys05.net;
 
 
+import at.mritter.dezsys05.Encryptor;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -29,7 +30,8 @@ public class SocketServer extends Networking {
      *
      * @param port Port of the server socket that is created.
      */
-    public SocketServer(int port) {
+    public SocketServer(Encryptor encryptor, int port) {
+        super(encryptor);
         try {
             this.serverSocket = new ServerSocket(port);
         } catch (Exception e) {

@@ -10,10 +10,8 @@ import javax.crypto.*;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
-/**
- * Created by Mathias on 16.01.16.
- */
-public abstract class Encryptor {
+
+public abstract class Encryptor implements Recipient {
 
     public static final Logger LOG = LogManager.getLogger(Encryptor.class);
 
@@ -21,6 +19,7 @@ public abstract class Encryptor {
     private Networking socket;
     private LDAPConnector connector;
 
+    public abstract void handleMessage(Message message);
 
     public void sendEncryptedMessage(String text) {
 
